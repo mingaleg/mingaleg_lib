@@ -1,23 +1,23 @@
 Installation
 ============
 
-**my-package** supports Python >= 3.8.
+**mingaleg-lib** supports Python >= 3.8.
 
 ## Installing with `pip`
 
-**my-package** is available [on PyPI](https://pypi.org/project/my-package/). Just run
+**mingaleg-lib** is available [on PyPI](https://pypi.org/project/mingaleg-lib/). Just run
 
 ```bash
-pip install my-package
+pip install mingaleg-lib
 ```
 
 ## Installing from source
 
-To install **my-package** from source, first clone [the repository](https://github.com/allenai/python-package-template):
+To install **mingaleg-lib** from source, first clone [the repository](https://github.com/mingaleg/mingaleg_lib):
 
 ```bash
-git clone https://github.com/allenai/python-package-template.git
-cd python-package-template
+git clone https://github.com/mingaleg/mingaleg_lib.git
+cd mingaleg_lib
 ```
 
 Then run
