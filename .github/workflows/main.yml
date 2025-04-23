@@ -86,6 +86,8 @@ jobs:
             mypy-${{ env.CACHE_PREFIX }}-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('*requirements.txt') }}
 
       - name: ${{ matrix.task.name }}
+        env:
+          MINGALEG_SECRET_FS_PRIVATE_KEY: ${{ secrets.MINGALEG_SECRET_FS_PRIVATE_KEY }}
         run: |
           . .venv/bin/activate
           ${{ matrix.task.run }}

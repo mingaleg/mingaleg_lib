@@ -19,7 +19,8 @@ authors = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  # Add your own dependencies here
+  "pycryptodome>=3.22.0",
+  "python-dotenv>=1.1.0",
 ]
 license = {file = "LICENSE"}
 
@@ -71,7 +72,7 @@ mingaleg_lib = ["py.typed"]
 version = {attr = "mingaleg_lib.version.VERSION"}
 
 [tool.black]
-line-length = 100
+line-length = 120
 include = '\.pyi?$'
 exclude = '''
 (
@@ -98,10 +99,11 @@ reportPrivateImportUsage = false
 line-length = 115
 target-version = "py39"
 
-[tool.ruff.per-file-ignores]
+[lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
 [tool.mypy]
+mypy_path = "mingaleg_lib,tests"
 ignore_missing_imports = true
 no_site_packages = true
 check_untyped_defs = true
