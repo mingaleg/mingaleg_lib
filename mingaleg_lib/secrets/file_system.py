@@ -7,7 +7,7 @@ import tarfile
 from functools import cache
 from io import BufferedReader, BytesIO
 from pathlib import Path
-from typing import IO
+from typing import IO, Union
 
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.PublicKey import RSA
@@ -16,7 +16,7 @@ CWD = Path(__file__).parent
 
 
 @cache
-def secret_file_system(private_key: str | bytes | None = None) -> "SecretFileSystem":
+def secret_file_system(private_key: Union[str, bytes, None] = None) -> "SecretFileSystem":
     """
     Get the secret file system.
     """
@@ -31,7 +31,7 @@ class SecretFileSystem:
     PRIVATE_KEY_ENVIRON_NAME = "MINGALEG_SECRET_FS_PRIVATE_KEY"
 
     @classmethod
-    def open(cls, private_key: str | bytes | None = None) -> "SecretFileSystem":
+    def open(cls, private_key: Union[str, bytes, None] = None) -> "SecretFileSystem":
         """
         Open the secret file system.
         """
@@ -51,7 +51,7 @@ class SecretFileSystem:
                 continue
         raise InvalidPrivateKey("Invalid private key")
 
-    def __init__(self, *, private_key: str | bytes, encrypted_data: BufferedReader):
+    def __init__(self, *, private_key: Union[str, bytes], encrypted_data: BufferedReader):
         _private_key = RSA.import_key(private_key)
 
         enc_session_key = encrypted_data.read(_private_key.size_in_bytes())
@@ -72,7 +72,7 @@ class SecretFileSystem:
 
         self.tar_fs = tarfile.open(fileobj=BytesIO(data), mode="r:gz")
 
-    def __getitem__(self, key: Path | str) -> IO[bytes]:
+    def __getitem__(self, key: Union[Path, str]) -> IO[bytes]:
         obj = self.tar_fs.extractfile(str(Path("file_system", key)))
         if obj is None:
             raise FileNotFoundError(f"File {key} not found in secret_file_system")
