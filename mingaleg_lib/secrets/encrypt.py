@@ -2,6 +2,7 @@
 Generate a tar archive of the source directory and encrypt it with GPG.
 """
 
+import sys
 import tarfile
 import tempfile
 from pathlib import Path
@@ -49,3 +50,15 @@ def encrypt_secret_file_system_all(source: Path) -> list[Path]:
     return [
         encrypt_secret_file_system(source, public_key.stem) for public_key in (CWD / "public_keyring").glob("*.pem")
     ]
+
+
+def main(argv: list[str]):
+    """
+    Encrypt the secret file system.
+    """
+    for path in encrypt_secret_file_system_all(Path(argv[1])):
+        print(path)
+
+
+if __name__ == "__main__":
+    main(sys.argv)
