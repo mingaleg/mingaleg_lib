@@ -1,3 +1,5 @@
+[![Main](https://github.com/mingaleg/mingaleg_lib/actions/workflows/main.yml/badge.svg)](https://github.com/mingaleg/mingaleg_lib/actions/workflows/main.yml)
+
 # python-package-template
 
 This is a template repository for Python package projects.
