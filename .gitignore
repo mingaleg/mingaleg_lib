@@ -1,5 +1,7 @@
 # unencrypted secrets
 /secrets/
+/keyring/
+
 .env
 
 

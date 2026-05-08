@@ -10,7 +10,7 @@ def generate_secret_file_system_keys(key_name: str):
     """
     key = RSA.generate(2048)
 
-    secret_keychain_dir = Path("secrets", "keyring", key_name)
+    secret_keychain_dir = Path("keyring", key_name)
     secret_keychain_dir.mkdir(parents=True, exist_ok=True)
 
     private_key = key.export_key()
