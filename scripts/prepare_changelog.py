@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from mingaleg_lib.version import VERSION
@@ -28,7 +28,7 @@ def main():
     lines.insert(
         insert_index + 1,
         f"## [v{VERSION}](https://github.com/mingaleg/mingaleg_lib/releases/tag/v{VERSION}) - "
-        f"{datetime.now(tz=timezone.utc).strftime('%Y-%m-%d')}\n",
+        f"{datetime.now(tz=UTC).strftime('%Y-%m-%d')}\n",
     )
 
     with changelog.open("w") as f:
