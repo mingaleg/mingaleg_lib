@@ -1,114 +1,113 @@
 [![Main](https://github.com/mingaleg/mingaleg_lib/actions/workflows/main.yml/badge.svg)](https://github.com/mingaleg/mingaleg_lib/actions/workflows/main.yml)
+[![PyPI](https://img.shields.io/pypi/v/mingaleg-lib)](https://pypi.org/project/mingaleg-lib/)
 
-# python-package-template
+# mingaleg-lib
 
-This is a template repository for Python package projects.
+[@mingaleg](https://github.com/mingaleg)'s personal Python library.
+
+Its main feature is a **secret file system**: a directory of private files, encrypted
+into the repository so it can be committed to git, and readable at runtime by anyone
+holding one of the corresponding RSA private keys.
 
 ## In this README :point_down:
 
-- [Features](#features)
-- [Usage](#usage)
-  - [Initial setup](#initial-setup)
-  - [Creating releases](#creating-releases)
-- [Projects using this template](#projects-using-this-template)
-- [FAQ](#faq)
-- [Contributing](#contributing)
+- [Installation](#installation)
+- [The secret file system](#the-secret-file-system)
+  - [Reading secrets](#reading-secrets)
+  - [Writing secrets](#writing-secrets)
+  - [How it works](#how-it-works)
+- [Development](#development)
+- [Releases](#releases)
 
-## Features
+## Installation
 
-This template repository comes with all of the boilerplate needed for:
+Requires **Python 3.11 or newer**.
 
-⚙️ Robust (and free) CI with [GitHub Actions](https://github.com/features/actions):
-  - Unit tests ran with [PyTest](https://docs.pytest.org) against multiple Python versions and operating systems.
-  - Type checking with [mypy](https://github.com/python/mypy).
-  - Linting with [ruff](https://astral.sh/ruff).
-  - Formatting with [isort](https://pycqa.github.io/isort/) and [black](https://black.readthedocs.io/en/stable/).
+```bash
+pip install mingaleg-lib
+```
 
-🤖 [Dependabot](https://github.blog/2020-06-01-keep-all-your-packages-up-to-date-with-dependabot/) configuration to keep your dependencies up-to-date.
+Or from source:
 
-📄 Great looking API documentation built using [Sphinx](https://www.sphinx-doc.org/en/master/) (run `make docs` to preview).
+```bash
+git clone https://github.com/mingaleg/mingaleg_lib.git
+cd mingaleg_lib
+pip install -e .
+```
 
-🚀 Automatic GitHub and PyPI releases. Just follow the steps in [`RELEASE_PROCESS.md`](./RELEASE_PROCESS.md) to trigger a new release.
+## The secret file system
 
-## Usage
+### Reading secrets
 
-### Initial setup
+The encrypted archives ship inside the package, so reading a secret only needs a private
+key. Point `MINGALEG_SECRET_FS_PRIVATE_KEY` at your PEM-encoded key:
 
-1. x [Create a new repository](https://github.com/allenai/python-package-template/generate) from this template with the desired name of your project.
+```python
+from mingaleg_lib.secrets.file_system import secret_file_system
 
-    *Your project name (i.e. the name of the repository) and the name of the corresponding Python package don't necessarily need to match, but you might want to check on [PyPI](https://pypi.org/) first to see if the package name you want is already taken.*
+hello = secret_file_system()["hello.txt"].read().decode("utf-8")
+```
 
-2. x Create a Python 3.8 or newer virtual environment.
+Indexing returns a binary file object, and paths are relative to the root of the secret
+file system. A missing path raises `FileNotFoundError`.
 
-    *If you're not sure how to create a suitable Python environment, the easiest way is using [Miniconda](https://docs.conda.io/en/latest/miniconda.html). On a Mac, for example, you can install Miniconda using [Homebrew](https://brew.sh/):*
+The key can also be passed explicitly, which skips the environment variable:
 
-    ```
-    brew install miniconda
-    ```
+```python
+secret_file_system(private_key=Path("~/.keys/mingamini.pem").expanduser().read_bytes())
+```
 
-    *Then you can create and activate a new Python environment by running:*
+`secret_file_system()` is cached, so repeated calls reuse one decrypted archive. It tries
+every bundled archive in turn and returns the first one your key opens; if none do, it
+raises `InvalidPrivateKey`. A missing `MINGALEG_SECRET_FS_PRIVATE_KEY` with no explicit
+key raises `SecretFileSystemException`.
 
-    ```
-    conda create -n my-package python=3.9
-    conda activate my-package
-    ```
+### Writing secrets
 
-3. x Now that you have a suitable Python environment, you're ready to personalize this repository. Just run:
+Keep the plaintext files in a directory outside version control — `/secrets/` and
+`/keyring/` at the repo root are both gitignored for this. To re-encrypt them for every
+public key in [`mingaleg_lib/secrets/public_keyring/`](mingaleg_lib/secrets/public_keyring):
 
-    ```
-    pip install -r setup-requirements.txt
-    python scripts/personalize.py
-    ```
+```bash
+python -m mingaleg_lib.secrets.encrypt /path/to/plaintext/dir
+```
 
-    And then follow the prompts.
+This rewrites one `.bin` per public key in
+[`mingaleg_lib/secrets/encrypted/`](mingaleg_lib/secrets/encrypted), which are the files
+you commit. Adding a new reader means dropping their public key into `public_keyring/`
+and re-running the command; revoking one means deleting both their `.pem` and their
+`.bin`, then rotating whatever they could read.
 
-    :pencil: *NOTE: This script will overwrite the README in your repository.*
+### How it works
 
-4. x Commit and push your changes, then make sure all GitHub Actions jobs pass.
+Each archive is the plaintext directory as a gzipped tarball, encrypted with a random
+AES-128-EAX session key; that session key is itself encrypted to one RSA public key with
+PKCS#1 OAEP. The `.bin` layout is the encrypted session key, then the 16-byte nonce, the
+16-byte tag, and the ciphertext. Because the payload is encrypted once per recipient
+rather than shared, each holder needs only their own private key.
 
-5. x (Optional) If you plan on publishing your package to PyPI, add repository secrets for `PYPI_USERNAME` and `PYPI_PASSWORD`. To add these, go to "Settings" > "Secrets" > "Actions", and then click "New repository secret".
+## Development
 
-    *If you don't have PyPI account yet, you can [create one for free](https://pypi.org/account/register/).*
+The project uses [uv](https://docs.astral.sh/uv/):
 
-6. (Optional) If you want to deploy your API docs to [readthedocs.org](https://readthedocs.org), go to the [readthedocs dashboard](https://readthedocs.org/dashboard/import/?) and import your new project.
+```bash
+uv sync --extra dev
+```
 
-    Then click on the "Admin" button, navigate to "Automation Rules" in the sidebar, click "Add Rule", and then enter the following fields:
+Then:
 
-    - **Description:** Publish new versions from tags
-    - **Match:** Custom Match
-    - **Custom match:** v[vV]
-    - **Version:** Tag
-    - **Action:** Activate version
+```bash
+make run-checks   # isort, black, ruff, mypy, pytest
+make fix-checks   # same, but applies the formatters' and ruff's fixes
+make docs         # live-reloading Sphinx build
+```
 
-    Then hit "Save".
+:warning: The test suite reads the secret file system, so `make run-checks` needs
+`MINGALEG_SECRET_FS_PRIVATE_KEY` set. In CI it comes from the repository secret of the
+same name, decrypting the `github-ci` archive.
 
-    *After your first release, the docs will automatically be published to [your-project-name.readthedocs.io](https://your-project-name.readthedocs.io/).*
+## Releases
 
-### Creating releases
-
-Creating new GitHub and PyPI releases is easy. The GitHub Actions workflow that comes with this repository will handle all of that for you.
-All you need to do is follow the instructions in [RELEASE_PROCESS.md](./RELEASE_PROCESS.md).
-
-## Projects using this template
-
-Here is an incomplete list of some projects that started off with this template:
-
-- [ai2-tango](https://github.com/allenai/tango)
-- [cached-path](https://github.com/allenai/cached_path)
-- [beaker-py](https://github.com/allenai/beaker-py)
-- [gantry](https://github.com/allenai/beaker-gantry)
-- [ip-bot](https://github.com/abe-101/ip-bot)
-- [atty](https://github.com/mstuttgart/atty)
-
-☝️ *Want your work featured here? Just open a pull request that adds the link.*
-
-## FAQ
-
-#### Should I use this template even if I don't want to publish my package?
-
-Absolutely! If you don't want to publish your package, just delete the `docs/` directory and the `release` job in [`.github/workflows/main.yml`](https://github.com/allenai/python-package-template/blob/main/.github/workflows/main.yml).
-
-## Contributing
-
-If you find a bug :bug:, please open a [bug report](https://github.com/allenai/python-package-template/issues/new?assignees=&labels=bug&template=bug_report.md&title=).
-If you have an idea for an improvement or new feature :rocket:, please open a [feature request](https://github.com/allenai/python-package-template/issues/new?assignees=&labels=Feature+request&template=feature_request.md&title=).
+Bump the version in `mingaleg_lib/version.py` and follow
+[`RELEASE_PROCESS.md`](./RELEASE_PROCESS.md). Tagging triggers the GitHub Actions
+workflow that publishes both the GitHub release and the PyPI package.

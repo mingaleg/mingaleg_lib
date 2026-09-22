@@ -1,7 +1,7 @@
 Installation
 ============
 
-**mingaleg-lib** supports Python >= 3.9.
+**mingaleg-lib** supports Python >= 3.11.
 
 ## Installing with `pip`
 
