@@ -103,7 +103,7 @@ reportPrivateImportUsage = false
 line-length = 115
 target-version = "py311"
 
-[lint.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
 [tool.mypy]
