@@ -7,7 +7,7 @@
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 # -- Path setup --------------------------------------------------------------
 
@@ -23,7 +23,7 @@ from mingaleg_lib import VERSION, VERSION_SHORT
 # -- Project information -----------------------------------------------------
 
 project = "mingaleg-lib"
-copyright = f"{datetime.now(tz=timezone.utc).year}, Allen Institute for Artificial Intelligence"
+copyright = f"{datetime.now(tz=UTC).year}, Allen Institute for Artificial Intelligence"
 author = "Allen Institute for Artificial Intelligence"
 version = VERSION_SHORT
 release = VERSION

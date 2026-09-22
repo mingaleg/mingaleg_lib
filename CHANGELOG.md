@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Relaxed the `isort` dev dependency bound to `>=5.12,<9.1`.
 Fixed all `ruff check` findings; `SecretFileSystem` now uses PEP 604 type
 annotations (behaviour unchanged). Added `uv.lock`.
+**Dropped support for Python 3.9 and 3.10**; the minimum is now 3.11.
+Relaxed the `black` dev dependency bound to `>=23.0,<27.0`.
 
 ## [v0.2.1](https://github.com/mingaleg/mingaleg_lib/releases/tag/v0.2.1) - 2025-04-24
 Dependabot keys for Secret FS.
